@@ -1,4 +1,4 @@
-name: Android YouTube TV CI
+name: Android JioHotstar TV CI
 
 on:
   push:
@@ -19,15 +19,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Create Clean YouTube TV Project
+    - name: Create Clean JioHotstar Project
       run: |
-        mkdir -p app/src/main/java/com/example/youtubetv
+        mkdir -p app/src/main/java/com/example/jiohotstartv
 
-        # 1. Root settings.gradle
         echo "include ':app'" > settings.gradle
-        echo "rootProject.name = 'YouTubeTV'" >> settings.gradle
+        echo "rootProject.name = 'JioHotstarTV'" >> settings.gradle
 
-        # 2. Root build.gradle
         cat << 'EOF' > build.gradle
         buildscript {
             repositories { google(); mavenCentral() }
@@ -38,45 +36,39 @@ jobs:
         }
         EOF
 
-        # 3. App build.gradle
         cat << 'EOF' > app/build.gradle
         plugins { id 'com.android.application' }
         android {
-            namespace 'com.example.youtubetv'
+            namespace 'com.example.jiohotstartv'
             compileSdk 33
             defaultConfig {
-                applicationId "com.example.youtubetv"
+                applicationId "com.example.jiohotstartv"
                 minSdk 21
                 targetSdk 33
-                versionCode 1
-                versionName "1.0"
+                versionCode 2
+                versionName "1.1"
             }
         }
         EOF
 
-        # 4. AndroidManifest.xml (यूट्यूब टीवी नाम और लोगो सेटिंग्स के साथ)
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-            <uses-feature android:name="android.software.leanback" android:required="false" />
-            <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-            <application android:allowBackup="true" android:label="YouTube TV" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            <application android:allowBackup="true" android:label="JioHotstar TV" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                 <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="landscape">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
                         <category android:name="android.intent.category.LAUNCHER" />
-                        <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
                     </intent-filter>
                 </activity>
             </application>
         </manifest>
         EOF
 
-        # 5. MainActivity.java (यूट्यूब के स्पेशल टीवी ब्राउज़र मोड के साथ)
-        cat << 'EOF' > app/src/main/java/com/example/youtubetv/MainActivity.java
-        package com.example.youtubetv;
+        cat << 'EOF' > app/src/main/java/com/example/jiohotstartv/MainActivity.java
+        package com.example.jiohotstartv;
         import android.app.Activity;
         import android.os.Bundle;
         import android.view.KeyEvent;
@@ -94,17 +86,15 @@ jobs:
                 WebSettings webSettings = myWebView.getSettings();
                 webSettings.setJavaScriptEnabled(true);
                 webSettings.setDomStorageEnabled(true);
-                webSettings.setAllowFileAccess(true);
+                webSettings.setDatabaseEnabled(true);
                 webSettings.setMediaPlaybackRequiresUserGesture(false);
-                myWebView.setFocusable(true);
-                myWebView.setFocusableInTouchMode(true);
                 
-                // यह स्पेशल कोड टीवी वाला असली यूट्यूब इंटरफेस चालू करेगा
-                String tvUserAgent = "Mozilla/5.0 (Node.js) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36 SmartTV";
-                webSettings.setUserAgentString(tvUserAgent);
+                // एकदम नया सफारी/क्रोम कंबाइन यूजर एजेंट ताकि हॉटस्टार पुराने एंड्रॉइड को न ब्लॉक करे
+                String updatedUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+                webSettings.setUserAgentString(updatedUserAgent);
                 
                 myWebView.setWebViewClient(new WebViewClient());
-                myWebView.loadUrl("https://www.youtube.com");
+                myWebView.loadUrl("https://www.jiohotstar.com");
             }
             @Override
             public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -128,5 +118,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: youtube-tv-app
+        name: jiohotstar-tv-app
         path: app/build/outputs/apk/debug/app-debug.apk
