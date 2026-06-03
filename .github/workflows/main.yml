@@ -1,4 +1,4 @@
-name: Android JioHotstar TV CI
+name: Android YouTube TV CI
 
 on:
   push:
@@ -19,12 +19,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Create Clean JioHotstar Project
+    - name: Create Clean YouTube TV Project
       run: |
-        mkdir -p app/src/main/java/com/example/jiohotstartv
+        mkdir -p app/src/main/java/com/example/youtubetv
 
         echo "include ':app'" > settings.gradle
-        echo "rootProject.name = 'JioHotstarTV'" >> settings.gradle
+        echo "rootProject.name = 'YouTubeTV'" >> settings.gradle
 
         cat << 'EOF' > build.gradle
         buildscript {
@@ -39,10 +39,10 @@ jobs:
         cat << 'EOF' > app/build.gradle
         plugins { id 'com.android.application' }
         android {
-            namespace 'com.example.jiohotstartv'
+            namespace 'com.example.youtubetv'
             compileSdk 33
             defaultConfig {
-                applicationId "com.example.jiohotstartv"
+                applicationId "com.example.youtubetv"
                 minSdk 21
                 targetSdk 33
                 versionCode 2
@@ -56,7 +56,7 @@ jobs:
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-            <application android:allowBackup="true" android:label="JioHotstar TV" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            <application android:allowBackup="true" android:label="YouTube TV" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                 <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="landscape">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
@@ -67,8 +67,8 @@ jobs:
         </manifest>
         EOF
 
-        cat << 'EOF' > app/src/main/java/com/example/jiohotstartv/MainActivity.java
-        package com.example.jiohotstartv;
+        cat << 'EOF' > app/src/main/java/com/example/youtubetv/MainActivity.java
+        package com.example.youtubetv;
         import android.app.Activity;
         import android.os.Bundle;
         import android.view.KeyEvent;
@@ -89,12 +89,13 @@ jobs:
                 webSettings.setDatabaseEnabled(true);
                 webSettings.setMediaPlaybackRequiresUserGesture(false);
                 
-                // एकदम नया सफारी/क्रोम कंबाइन यूजर एजेंट ताकि हॉटस्टार पुराने एंड्रॉइड को न ब्लॉक करे
-                String updatedUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+                // नया और आधुनिक टीवी यूजर एजेंट ताकि खाली डिब्बे न दिखें
+                String updatedUserAgent = "Mozilla/5.0 (PlayStation 5;显卡) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 InettvBrowser/1.0";
                 webSettings.setUserAgentString(updatedUserAgent);
                 
                 myWebView.setWebViewClient(new WebViewClient());
-                myWebView.loadUrl("https://www.jiohotstar.com");
+                // यूट्यूब का नया स्पेशल वेब इंटरफेस लिंक
+                myWebView.loadUrl("https://www.youtube.com/tv#/surface?c=tv&v=homepage");
             }
             @Override
             public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -118,5 +119,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: jiohotstar-tv-app
+        name: youtube-tv-app
         path: app/build/outputs/apk/debug/app-debug.apk
