@@ -19,7 +19,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # यह बिना किसी भारी लाइब्रेरी का एकदम लाइटवेट प्रोजेक्ट ढांचा तैयार करेगा
     - name: Create Clean Android Structure
       run: |
         mkdir -p app/src/main/java/com/example/jiohotstartv
@@ -39,7 +38,7 @@ jobs:
         }
         EOF
 
-        # 3. App build.gradle (बिना किसी अप्पकोंपेट डिपेंडेंसी के - एकदम लाइटवेट)
+        # 3. App build.gradle
         cat << 'EOF' > app/build.gradle
         plugins { id 'com.android.application' }
         android {
@@ -55,7 +54,7 @@ jobs:
         }
         EOF
 
-        # 4. AndroidManifest.xml (बिना किसी थीम थीम झंझट के सीधे एंड्रॉइड की डिफॉल्ट थीम पर)
+        # 4. AndroidManifest.xml
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -75,7 +74,7 @@ jobs:
         </manifest>
         EOF
 
-        # 5. MainActivity.java (प्योर एंड्रॉइड एक्टिविटी - सुपर फ़ास्ट)
+        # 5. MainActivity.java
         cat << 'EOF' > app/src/main/java/com/example/jiohotstartv/MainActivity.java
         package com.example.jiohotstartv;
         import android.app.Activity;
@@ -115,10 +114,11 @@ jobs:
         }
         EOF
 
+    # यहाँ मैंने 8 को बदलकर 8.0 कर दिया है
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
       with:
-        gradle-version: 8.0
+        gradle-version: '8.0'
 
     - name: Build with Gradle
       run: gradle assembleDebug
