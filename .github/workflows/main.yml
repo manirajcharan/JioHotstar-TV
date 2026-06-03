@@ -13,17 +13,16 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
     
-    - name: Set up JDK 11
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
 
-    # यह स्टेप खुद ही आपके लिए सारे फोल्डर और फाइलें बिल्कुल सही जगह बना देगा
-    - name: Create Android Project Structure
+    # यह बिना किसी भारी लाइब्रेरी का एकदम लाइटवेट प्रोजेक्ट ढांचा तैयार करेगा
+    - name: Create Clean Android Structure
       run: |
         mkdir -p app/src/main/java/com/example/jiohotstartv
-        mkdir -p app/src/main/res/layout
 
         # 1. Root settings.gradle
         echo "include ':app'" > settings.gradle
@@ -33,15 +32,14 @@ jobs:
         cat << 'EOF' > build.gradle
         buildscript {
             repositories { google(); mavenCentral() }
-            dependencies { classpath "com.android.tools.build:gradle:7.4.2" }
+            dependencies { classpath "com.android.tools.build:gradle:8.0.2" }
         }
         allprojects {
             repositories { google(); mavenCentral() }
         }
-        task clean(type: Delete) { delete rootProject.buildDir }
         EOF
 
-        # 3. App build.gradle
+        # 3. App build.gradle (बिना किसी अप्पकोंपेट डिपेंडेंसी के - एकदम लाइटवेट)
         cat << 'EOF' > app/build.gradle
         plugins { id 'com.android.application' }
         android {
@@ -55,10 +53,9 @@ jobs:
                 versionName "1.0"
             }
         }
-        dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
         EOF
 
-        # 4. AndroidManifest.xml
+        # 4. AndroidManifest.xml (बिना किसी थीम थीम झंझट के सीधे एंड्रॉइड की डिफॉल्ट थीम पर)
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -66,7 +63,7 @@ jobs:
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
             <uses-feature android:name="android.software.leanback" android:required="false" />
             <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-            <application android:allowBackup="true" android:label="JioHotstar TV" android:theme="@style/Theme.AppCompat.NoActionBar">
+            <application android:allowBackup="true" android:label="JioHotstar TV" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                 <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="landscape">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
@@ -78,17 +75,17 @@ jobs:
         </manifest>
         EOF
 
-        # 5. MainActivity.java
+        # 5. MainActivity.java (प्योर एंड्रॉइड एक्टिविटी - सुपर फ़ास्ट)
         cat << 'EOF' > app/src/main/java/com/example/jiohotstartv/MainActivity.java
         package com.example.jiohotstartv;
+        import android.app.Activity;
         import android.os.Bundle;
         import android.view.KeyEvent;
         import android.webkit.WebSettings;
         import android.webkit.WebView;
         import android.webkit.WebViewClient;
-        import androidx.appcompat.app.AppCompatActivity;
 
-        public class MainActivity extends AppCompatActivity {
+        public class MainActivity extends Activity {
             private WebView myWebView;
             @Override
             protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +102,7 @@ jobs:
                 String tvUserAgent = "Mozilla/5.0 (Large Screen; SmartTV; Linux; Android 5.1.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.210 Safari/537.36";
                 webSettings.setUserAgentString(tvUserAgent);
                 myWebView.setWebViewClient(new WebViewClient());
-                myWebView.loadUrl("https://www.hotstar.com");
+                myWebView.loadUrl("https://www.jiohotstar.com");
             }
             @Override
             public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -121,7 +118,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
       with:
-        gradle-version: 7.5
+        gradle-version: 8.0
 
     - name: Build with Gradle
       run: gradle assembleDebug
