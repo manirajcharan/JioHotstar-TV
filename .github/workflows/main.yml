@@ -1,4 +1,4 @@
-name: Android CI
+name: Android YouTube TV CI
 
 on:
   push:
@@ -19,13 +19,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Create Clean Android Structure
+    - name: Create Clean YouTube TV Project
       run: |
-        mkdir -p app/src/main/java/com/example/jiohotstartv
+        mkdir -p app/src/main/java/com/example/youtubetv
 
         # 1. Root settings.gradle
         echo "include ':app'" > settings.gradle
-        echo "rootProject.name = 'JioHotstarTV'" >> settings.gradle
+        echo "rootProject.name = 'YouTubeTV'" >> settings.gradle
 
         # 2. Root build.gradle
         cat << 'EOF' > build.gradle
@@ -42,10 +42,10 @@ jobs:
         cat << 'EOF' > app/build.gradle
         plugins { id 'com.android.application' }
         android {
-            namespace 'com.example.jiohotstartv'
+            namespace 'com.example.youtubetv'
             compileSdk 33
             defaultConfig {
-                applicationId "com.example.jiohotstartv"
+                applicationId "com.example.youtubetv"
                 minSdk 21
                 targetSdk 33
                 versionCode 1
@@ -54,7 +54,7 @@ jobs:
         }
         EOF
 
-        # 4. AndroidManifest.xml
+        # 4. AndroidManifest.xml (यूट्यूब टीवी नाम और लोगो सेटिंग्स के साथ)
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -62,7 +62,7 @@ jobs:
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
             <uses-feature android:name="android.software.leanback" android:required="false" />
             <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-            <application android:allowBackup="true" android:label="JioHotstar TV" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            <application android:allowBackup="true" android:label="YouTube TV" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                 <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="landscape">
                     <intent-filter>
                         <action android:name="android.intent.action.MAIN" />
@@ -74,9 +74,9 @@ jobs:
         </manifest>
         EOF
 
-        # 5. MainActivity.java
-        cat << 'EOF' > app/src/main/java/com/example/jiohotstartv/MainActivity.java
-        package com.example.jiohotstartv;
+        # 5. MainActivity.java (यूट्यूब के स्पेशल टीवी ब्राउज़र मोड के साथ)
+        cat << 'EOF' > app/src/main/java/com/example/youtubetv/MainActivity.java
+        package com.example.youtubetv;
         import android.app.Activity;
         import android.os.Bundle;
         import android.view.KeyEvent;
@@ -98,10 +98,13 @@ jobs:
                 webSettings.setMediaPlaybackRequiresUserGesture(false);
                 myWebView.setFocusable(true);
                 myWebView.setFocusableInTouchMode(true);
-                String tvUserAgent = "Mozilla/5.0 (Large Screen; SmartTV; Linux; Android 5.1.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.210 Safari/537.36";
+                
+                // यह स्पेशल कोड टीवी वाला असली यूट्यूब इंटरफेस चालू करेगा
+                String tvUserAgent = "Mozilla/5.0 (Node.js) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36 SmartTV";
                 webSettings.setUserAgentString(tvUserAgent);
+                
                 myWebView.setWebViewClient(new WebViewClient());
-                myWebView.loadUrl("https://www.hotstar.com");
+                myWebView.loadUrl("https://www.youtube.com");
             }
             @Override
             public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -114,7 +117,6 @@ jobs:
         }
         EOF
 
-    # यहाँ मैंने 8 को बदलकर 8.0 कर दिया है
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
       with:
@@ -126,5 +128,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: jiohotstar-tv-app
+        name: youtube-tv-app
         path: app/build/outputs/apk/debug/app-debug.apk
