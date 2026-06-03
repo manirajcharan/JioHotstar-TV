@@ -1,0 +1,133 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    # यह स्टेप खुद ही आपके लिए सारे फोल्डर और फाइलें बिल्कुल सही जगह बना देगा
+    - name: Create Android Project Structure
+      run: |
+        mkdir -p app/src/main/java/com/example/jiohotstartv
+        mkdir -p app/src/main/res/layout
+
+        # 1. Root settings.gradle
+        echo "include ':app'" > settings.gradle
+        echo "rootProject.name = 'JioHotstarTV'" >> settings.gradle
+
+        # 2. Root build.gradle
+        cat << 'EOF' > build.gradle
+        buildscript {
+            repositories { google(); mavenCentral() }
+            dependencies { classpath "com.android.tools.build:gradle:7.4.2" }
+        }
+        allprojects {
+            repositories { google(); mavenCentral() }
+        }
+        task clean(type: Delete) { delete rootProject.buildDir }
+        EOF
+
+        # 3. App build.gradle
+        cat << 'EOF' > app/build.gradle
+        plugins { id 'com.android.application' }
+        android {
+            namespace 'com.example.jiohotstartv'
+            compileSdk 33
+            defaultConfig {
+                applicationId "com.example.jiohotstartv"
+                minSdk 21
+                targetSdk 33
+                versionCode 1
+                versionName "1.0"
+            }
+        }
+        dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
+        EOF
+
+        # 4. AndroidManifest.xml
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-feature android:name="android.software.leanback" android:required="false" />
+            <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+            <application android:allowBackup="true" android:label="JioHotstar TV" android:theme="@style/Theme.AppCompat.NoActionBar">
+                <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="landscape">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                        <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+
+        # 5. MainActivity.java
+        cat << 'EOF' > app/src/main/java/com/example/jiohotstartv/MainActivity.java
+        package com.example.jiohotstartv;
+        import android.os.Bundle;
+        import android.view.KeyEvent;
+        import android.webkit.WebSettings;
+        import android.webkit.WebView;
+        import android.webkit.WebViewClient;
+        import androidx.appcompat.app.AppCompatActivity;
+
+        public class MainActivity extends AppCompatActivity {
+            private WebView myWebView;
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                myWebView = new WebView(this);
+                setContentView(myWebView);
+                WebSettings webSettings = myWebView.getSettings();
+                webSettings.setJavaScriptEnabled(true);
+                webSettings.setDomStorageEnabled(true);
+                webSettings.setAllowFileAccess(true);
+                webSettings.setMediaPlaybackRequiresUserGesture(false);
+                myWebView.setFocusable(true);
+                myWebView.setFocusableInTouchMode(true);
+                String tvUserAgent = "Mozilla/5.0 (Large Screen; SmartTV; Linux; Android 5.1.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.210 Safari/537.36";
+                webSettings.setUserAgentString(tvUserAgent);
+                myWebView.setWebViewClient(new WebViewClient());
+                myWebView.loadUrl("https://www.hotstar.com");
+            }
+            @Override
+            public boolean onKeyDown(int keyCode, KeyEvent event) {
+                if ((keyCode == KeyEvent.KEYCODE_BACK) && myWebView.canGoBack()) {
+                    myWebView.goBack();
+                    return true;
+                }
+                return super.onKeyDown(keyCode, event);
+            }
+        }
+        EOF
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
+      with:
+        gradle-version: 7.5
+
+    - name: Build with Gradle
+      run: gradle assembleDebug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: jiohotstar-tv-app
+        path: app/build/outputs/apk/debug/app-debug.apk
