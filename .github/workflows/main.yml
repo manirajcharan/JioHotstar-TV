@@ -95,7 +95,7 @@ jobs:
                 
                 myWebView.setWebViewClient(new WebViewClient());
                 // यूट्यूब का नया स्पेशल वेब इंटरफेस लिंक
-                myWebView.loadUrl("https://www.youtube.com/tv#/surface?c=tv&v=homepage");
+                myWebView.loadUrl("https://www.youtube.com/");
             }
             @Override
             public boolean onKeyDown(int keyCode, KeyEvent event) {
