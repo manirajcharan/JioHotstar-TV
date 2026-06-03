@@ -101,7 +101,7 @@ jobs:
                 String tvUserAgent = "Mozilla/5.0 (Large Screen; SmartTV; Linux; Android 5.1.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.210 Safari/537.36";
                 webSettings.setUserAgentString(tvUserAgent);
                 myWebView.setWebViewClient(new WebViewClient());
-                myWebView.loadUrl("https://www.jiohotstar.com");
+                myWebView.loadUrl("https://www.hotstar.com");
             }
             @Override
             public boolean onKeyDown(int keyCode, KeyEvent event) {
